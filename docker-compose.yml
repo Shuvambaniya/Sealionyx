@@ -1,0 +1,61 @@
+# Sealionyx - Docker Compose
+# Run: cp .env.docker.example .env && fill in values, then: docker compose up --build
+
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: sealionyx-backend:latest
+    container_name: sealionyx-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - CRYPTO_SECRET=${CRYPTO_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
+      - DEBUG=${DEBUG:-false}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
+      - CA_COMMON_NAME=${CA_COMMON_NAME:-Sealionyx Root CA}
+      - CA_ORGANIZATION=${CA_ORGANIZATION:-Sealionyx}
+      - CA_COUNTRY=${CA_COUNTRY:-NP}
+      - CA_STATE=${CA_STATE:-Kathmandu}
+      - CA_VALIDITY_DAYS=${CA_VALIDITY_DAYS:-3650}
+      - USER_CERT_VALIDITY_DAYS=${USER_CERT_VALIDITY_DAYS:-365}
+    volumes:
+      - sealionyx_ca:/app/ca
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    image: sealionyx-frontend:latest
+    container_name: sealionyx-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  sealionyx_ca:
+    driver: local
