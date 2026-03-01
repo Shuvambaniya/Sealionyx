@@ -761,14 +761,6 @@ Alternative: AES-256-GCM with key derived via PBKDF2 from server secret.
 - [Python Cryptography Library](https://cryptography.io/)
 - [X.509 Certificate Standard](https://en.wikipedia.org/wiki/X.509)
 
-## 🤝 Contributing
-
-This is a coursework project for ST6051CEM Practical Cryptography. For questions or issues, please refer to the course materials or contact the course instructor.
-
-## 📄 License
-
-MIT License - For educational purposes (ST6051CEM Coursework)
-
 ## 👥 Credits
 
 Developed as part of ST6051CEM Practical Cryptography coursework, demonstrating practical implementation of:
